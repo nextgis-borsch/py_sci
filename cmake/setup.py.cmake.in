@@ -1,0 +1,58 @@
+import sys, os, glob, subprocess, shutil
+from distutils import ccompiler, sysconfig
+from setuptools import setup, Extension
+
+sys.stdout.write('PROJ_DIR is set, using existing proj4 installation..\n')
+proj_libdir = "@PROJ4_LIBRARY_DIR@"
+proj_incdir = "@PROJ4_INCLUDE_DIRS@"
+libdirs=[]; incdirs = []; libraries = []; extra_link_args = []
+
+if sys.platform == 'darwin':
+    extra_link_args.extend(['-Wl,-F@PROJ4_FRAMEWORK_DIRS@'])
+    extra_link_args.extend(['-framework', '@PROJ4_FRAMEWORK@'])
+    extra_link_args.extend(['-Wl,-rpath,@loader_path/../../../../Frameworks/'])
+    extra_link_args.extend(['-mmacosx-version-min=@CMAKE_OSX_DEPLOYMENT_TARGET@'])
+elif sys.platform == 'win32':
+    libraries.append('proj4')
+    libdirs.append('@PROJ4_LIBRARY_DIR@')
+incdirs.append('@PROJ4_INCLUDE_DIRS@')
+
+pyprojext =\
+Extension("pyproj._proj",["_proj.c"],include_dirs=incdirs,library_dirs=libdirs,\
+libraries=libraries, extra_link_args=extra_link_args)
+
+extensions = [pyprojext]
+package_data = {}
+
+
+packages          = ['pyproj']
+package_dirs       = {'':'lib'}
+
+setup(name = "pyproj",
+  version = "@PROJ4_VERSION@",
+  description = "Python interface to PROJ.4 library",
+  long_description  = """
+Performs cartographic transformations between geographic (lat/lon)
+and map projection (x/y) coordinates. Can also transform directly
+from one map projection coordinate system to another.
+Coordinates can be given as numpy arrays, python arrays, lists or scalars.
+Optimized for numpy arrays.""",
+  url               = "https://github.com/jswhit/pyproj",
+  download_url      = "http://python.org/pypi/pyproj",
+  author            = "Jeff Whitaker",
+  author_email      = "jeffrey.s.whitaker@noaa.gov",
+  platforms         = ["any"],
+  license           = "OSI Approved",
+  keywords          = ["python","map projections","GIS","mapping","maps"],
+  classifiers       = ["Development Status :: 4 - Beta",
+                       "Intended Audience :: Science/Research",
+                       "License :: OSI Approved",
+                       "Topic :: Software Development :: Libraries :: Python Modules",
+                       "Topic :: Scientific/Engineering :: GIS",
+                       "Topic :: Scientific/Engineering :: Mathematics",
+                       "Operating System :: OS Independent"],
+  packages          = packages,
+  package_dir       = package_dirs,
+  ext_modules       = extensions,
+  package_data      = package_data
+  )

@@ -1,0 +1,10 @@
+[DEFAULT]
+library_dirs=@OPENBLAS_LIBRARY_DIR@
+include_dirs=@OPENBLAS_INCLUDE_DIRS@
+extra_link_args=-mmacosx-version-min=@CMAKE_OSX_DEPLOYMENT_TARGET@
+
+[blas_opt]
+libraries=openblas
+
+[lapack_opt]
+libraries=openblas
