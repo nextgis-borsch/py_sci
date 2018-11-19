@@ -117,7 +117,7 @@ list(GET PACKAGE_DETAILS 3 PROJECT_CPACK_FILENAME)
 report_version(${PROJECT_NAME} ${VERSION})
 
 if(OSX_FRAMEWORK)
-    set(FLAGS "ARCHFLAGS=-arch x86_64")
+    set(FLAGS "ARCHFLAGS=-arch x86_64") # -static -static-libgfortran -static-libgcc
 elseif(WIN32)
     if(MSVC_VERSION EQUAL 1400)
         set(FLAGS ${FLAGS} "VS90COMNTOOLS=$ENV{VS80COMNTOOLS}")
@@ -162,39 +162,23 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME})
     execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME})
 endif()
 
-include(FindAnyProject)
-find_anyproject(OpenBLAS REQUIRED)
 
-# config setupext.py
-set(OPENBLAS_LIBRARY_DIR)
-if(OSX_FRAMEWORK)
-    macro(get_lib_path_from_include PATH)
-        get_filename_component(FW_DIR ${PATH} PATH)
-        get_filename_component(OPENBLAS_LIBRARY_DIR ${FW_DIR} PATH)
-    endmacro()
+if(WIN32)
+    set(BASE_INTEL_PATH "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries\\windows")
+    if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+        set(MKL_LIBRARY_DIRS "${BASE_INTEL_PATH}\\mkl\\lib\\intel64;${BASE_INTEL_PATH}\\compiler\\lib\\intel64")
+        set(MKL_INCLUDE_DIRS "${BASE_INTEL_PATH}\\mkl\\include")
+        set(MKL_LIBS "mkl_lapack95_lp64,mkl_blas95_lp64,mkl_intel_lp64,mkl_intel_thread,mkl_core,libiomp5md")
+        set(LAPACK_LIBS "mkl_lapack95_lp64,mkl_blas95_lp64,mkl_intel_lp64,mkl_intel_thread,mkl_core,libiomp5md")
+    else()
+        set(MKL_LIBRARY_DIRS "${BASE_INTEL_PATH}\\mkl\\lib\\ia32;${BASE_INTEL_PATH}\\compiler\\lib\\ia32")
+        set(MKL_INCLUDE_DIRS "${BASE_INTEL_PATH}\\mkl\\include")
+        set(MKL_LIBS "mkl_lapack95,mkl_blas95,mkl_intel_c,mkl_intel_thread,mkl_core,libiomp5md")
+        set(LAPACK_LIBS "mkl_lapack95,mkl_blas95,mkl_intel_c,mkl_intel_thread,mkl_core,libiomp5md")
+    endif()
 
-    set(OPENBLAS_FRAMEWORK openblas)
-    get_lib_path_from_include(${OPENBLAS_INCLUDE_DIRS})
-    set(OPENBLAS_FRAMEWORK_DIRS ${OPENBLAS_LIBRARY_DIR})
-    set(OPENBLAS_LIBRARY_DIR ${OPENBLAS_LIBRARY_DIR}/openblas.framework)
-
-    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${OPENBLAS_LIBRARY_DIR}/openblas ${OPENBLAS_LIBRARY_DIR}/libopenblas.so)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${OPENBLAS_LIBRARY_DIR}/openblas ${OPENBLAS_LIBRARY_DIR}/libblas.so)
-elseif(WIN32)
-    macro(get_lib_path_from_include PATH)
-        get_filename_component(FW_DIR ${PATH} PATH)
-        set(OPENBLAS_LIBRARY_DIR "${FW_DIR}/lib")
-    endmacro()
-    get_lib_path_from_include(${OPENBLAS_INCLUDE_DIRS})
-
-    set(OPENBLAS_NUMPY_PATH "C:\\projects\\numpy-wheels\\numpy\\build\\openblas")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${OPENBLAS_LIBRARY_DIR}/openblas.dll ${OPENBLAS_NUMPY_PATH})
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${OPENBLAS_INCLUDE_DIRS} ${OPENBLAS_NUMPY_PATH})
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/site.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/site.cfg IMMEDIATE @ONLY)
 endif()
-
-list(REMOVE_DUPLICATES OPENBLAS_INCLUDE_DIRS)
-
-configure_file(${CMAKE_SOURCE_DIR}/cmake/site.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/site.cfg IMMEDIATE @ONLY)
 
 # python setup.py install --prefix=/usr/local
 
