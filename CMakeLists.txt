@@ -194,7 +194,7 @@ macro(build_py ver)
 
     add_custom_target(build_py${ver} ALL
         COMMAND ${CMAKE_COMMAND} -E env "${FLAGS}"
-        ${PYTHON${ver}_EXECUTABLE} setup.py build_clib ${BUILD_INCLUDES} build_ext ${BUILD_INCLUDES}
+        ${PYTHON${ver}_EXECUTABLE} setup.py config ${BUILD_INCLUDES} build_clib ${BUILD_INCLUDES} build_ext ${BUILD_INCLUDES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}
         VERBATIM
     )
