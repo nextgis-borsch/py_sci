@@ -170,11 +170,13 @@ if(WIN32)
         set(MKL_INCLUDE_DIRS "${BASE_INTEL_PATH}\\mkl\\include")
         set(MKL_LIBS "mkl_lapack95_lp64,mkl_blas95_lp64,mkl_intel_lp64,mkl_intel_thread,mkl_core,libiomp5md")
         set(LAPACK_LIBS "mkl_lapack95_lp64,mkl_blas95_lp64,mkl_intel_lp64,mkl_intel_thread,mkl_core,libiomp5md")
+        set(BUILD_INCLUDES --compiler=msvc --fcompiler=intelvem)
     else()
         set(MKL_LIBRARY_DIRS "${BASE_INTEL_PATH}\\mkl\\lib\\ia32;${BASE_INTEL_PATH}\\compiler\\lib\\ia32")
         set(MKL_INCLUDE_DIRS "${BASE_INTEL_PATH}\\mkl\\include")
         set(MKL_LIBS "mkl_lapack95,mkl_blas95,mkl_intel_c,mkl_intel_thread,mkl_core,libiomp5md")
         set(LAPACK_LIBS "mkl_lapack95,mkl_blas95,mkl_intel_c,mkl_intel_thread,mkl_core,libiomp5md")
+        set(BUILD_INCLUDES --compiler=msvc --fcompiler=intelv)
     endif()
 
     configure_file(${CMAKE_SOURCE_DIR}/cmake/site.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/site.cfg IMMEDIATE @ONLY)
@@ -185,14 +187,14 @@ endif()
 macro(build_py ver)
     status_message("Configuring ... ${FLAGS} ${PYTHON${ver}_EXECUTABLE} setup.py build")
     execute_process(COMMAND ${CMAKE_COMMAND} -E env "${FLAGS}"
-        ${PYTHON${ver}_EXECUTABLE} setup.py build # ${BUILD_INCLUDES}
+        ${PYTHON${ver}_EXECUTABLE} setup.py config ${BUILD_INCLUDES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}
         OUTPUT_QUIET ERROR_QUIET
     )
 
     add_custom_target(build_py${ver} ALL
         COMMAND ${CMAKE_COMMAND} -E env "${FLAGS}"
-        ${PYTHON${ver}_EXECUTABLE} setup.py build # ${BUILD_INCLUDES}
+        ${PYTHON${ver}_EXECUTABLE} setup.py build_clib ${BUILD_INCLUDES} build_ext ${BUILD_INCLUDES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}
         VERBATIM
     )
