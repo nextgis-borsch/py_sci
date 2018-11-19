@@ -187,7 +187,7 @@ endif()
 macro(build_py ver)
     status_message("Configuring ... ${FLAGS} ${PYTHON${ver}_EXECUTABLE} setup.py build")
     execute_process(COMMAND ${CMAKE_COMMAND} -E env "${FLAGS}"
-        ${PYTHON${ver}_EXECUTABLE} setup.py config ${BUILD_INCLUDES}
+        ${PYTHON${ver}_EXECUTABLE} setup.py config ${BUILD_INCLUDES} build_clib ${BUILD_INCLUDES} build_ext ${BUILD_INCLUDES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}
         OUTPUT_QUIET ERROR_QUIET
     )
