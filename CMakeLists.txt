@@ -180,7 +180,8 @@ if(WIN32)
     endif()
 
     configure_file(${CMAKE_SOURCE_DIR}/cmake/site.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/site.cfg IMMEDIATE @ONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/setyp.py.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/_lib/setup.py IMMEDIATE @ONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/setyp.py.1.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/_lib/setup.py COPYONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/setyp.py.2.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/fftpack/setup.py COPYONLY)
 endif()
 
 # python setup.py install --prefix=/usr/local
