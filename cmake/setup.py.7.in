@@ -62,13 +62,15 @@ def configuration(parent_package='',top_path=None):
     config.add_library('sc_specfun',sources=specfun_src)
 
     # Extension specfun
+    cfg = dict(get_system_info('lapack_opt'))
     config.add_extension('specfun',
                          sources=['specfun.pyf'],
                          f2py_options=['--no-wrap-functions'],
                          depends=specfun_src,
                          define_macros=[],
                          libraries=['sc_specfun'],
-                         extra_info=get_info("lapack_opt"),
+                         # extra_info=get_info("lapack_opt"),
+                         **cfg
                         )
 
     # Extension _ufuncs
