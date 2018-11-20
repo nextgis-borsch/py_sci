@@ -184,6 +184,7 @@ if(WIN32)
     configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.2.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/fftpack/setup.py COPYONLY)
     configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.3.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/integrate/setup.py COPYONLY)
     configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.4.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/interpolate/setup.py COPYONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.5.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/io/setup.py COPYONLY)
 endif()
 
 # python setup.py install --prefix=/usr/local
