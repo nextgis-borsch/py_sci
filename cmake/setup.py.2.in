@@ -29,12 +29,14 @@ def configuration(parent_package='',top_path=None):
         libraries=['dfftpack', 'fftpack'],
         include_dirs=['src'],
         depends=(dfftpack_src + fftpack_src),
-        extra_info=blas_opt)
+        extra_info=blas_opt,
+    )
 
     config.add_extension('convolve',
         sources=['convolve.pyf','src/convolve.c'],
         libraries=['dfftpack'],
         depends=dfftpack_src,
+        extra_info=blas_opt,
     )
     return config
 
