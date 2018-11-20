@@ -28,7 +28,7 @@ def configuration(parent_package='',top_path=None):
         sources=sources,
         libraries=['dfftpack', 'fftpack'],
         include_dirs=['src'],
-        depends=(dfftpack_src + fftpack_src)
+        depends=(dfftpack_src + fftpack_src),
         extra_info=blas_opt)
 
     config.add_extension('convolve',
