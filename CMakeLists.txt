@@ -186,6 +186,7 @@ if(WIN32)
     configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.4.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/interpolate/setup.py COPYONLY)
     configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.5.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/io/setup.py COPYONLY)
     configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.6.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/optimize/setup.py COPYONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.7.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/special/setup.py COPYONLY)
 endif()
 
 # python setup.py install --prefix=/usr/local

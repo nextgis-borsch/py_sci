@@ -63,12 +63,15 @@ def configuration(parent_package='',top_path=None):
 
     # Extension specfun
     cfg = dict(get_system_info('lapack_opt'))
+    cfg.setdefault('include_dirs', []).extend([curdir] + inc_dirs + [numpy.get_include()])
+    cfg.setdefault('libraries', []).extend(['sc_specfun'])
+    cfg.setdefault('define_macros', []).extend(define_macros)
     config.add_extension('specfun',
                          sources=['specfun.pyf'],
                          f2py_options=['--no-wrap-functions'],
                          depends=specfun_src,
-                         define_macros=[],
-                         libraries=['sc_specfun'],
+                         # define_macros=[],
+                         # libraries=['sc_specfun'],
                          # extra_info=get_info("lapack_opt"),
                          **cfg
                         )
