@@ -21,8 +21,6 @@ def configuration(parent_package='',top_path=None):
 
     config = Configuration('special', parent_package, top_path)
 
-    blas_opt = get_system_info('lapack_opt')
-
     define_macros = []
     if sys.platform == 'win32':
         # define_macros.append(('NOINFINITIES',None))
@@ -70,7 +68,7 @@ def configuration(parent_package='',top_path=None):
                          depends=specfun_src,
                          define_macros=[],
                          libraries=['sc_specfun'],
-                         extra_info=blas_opt,
+                         extra_info=get_info("lapack_opt"),
                         )
 
     # Extension _ufuncs
