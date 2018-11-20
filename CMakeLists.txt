@@ -180,6 +180,7 @@ if(WIN32)
     endif()
 
     configure_file(${CMAKE_SOURCE_DIR}/cmake/site.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/site.cfg IMMEDIATE @ONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/setyp.py.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/_lib/setup.py IMMEDIATE @ONLY)
 endif()
 
 # python setup.py install --prefix=/usr/local
@@ -189,7 +190,7 @@ macro(build_py ver)
     execute_process(COMMAND ${CMAKE_COMMAND} -E env "${FLAGS}"
         ${PYTHON${ver}_EXECUTABLE} setup.py build ${BUILD_INCLUDES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}
-        OUTPUT_QUIET ERROR_QUIET
+        #OUTPUT_QUIET ERROR_QUIET
     )
 
     add_custom_target(build_py${ver} ALL
