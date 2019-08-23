@@ -58,6 +58,7 @@ if(NOT WITH_PYTHON2 AND NOT WITH_PYTHON3)
 endif()
 
 if(WITH_PYTHON2)
+set(LATEST_AVAILABLE_VERSION 1.2.2)
     find_package(PythonInterp 2)
     if(PYTHONINTERP_FOUND)
         set(PYTHON2_EXECUTABLE ${PYTHON_EXECUTABLE})
@@ -104,7 +105,7 @@ include(util)
 get_compiler_version(COMPILER)
 # get version and download url
 execute_process(COMMAND ${PYTHON_EXECUTABLE}
-    ${CMAKE_SOURCE_DIR}/cmake/pypi_process.py ${PLUGIN} ${CMAKE_CURRENT_BINARY_DIR}/meta.json ${COMPILER}
+    ${CMAKE_SOURCE_DIR}/cmake/pypi_process.py ${PLUGIN} ${CMAKE_CURRENT_BINARY_DIR}/meta.json ${COMPILER} ${LATEST_AVAILABLE_VERSION}
     OUTPUT_VARIABLE PACKAGE_DETAILS
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
