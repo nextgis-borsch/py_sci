@@ -53,51 +53,13 @@ else()
     set(INSTALL_LIB_DIR "." CACHE INTERNAL "Installation directory for libraries" FORCE)
 endif()
 
-if(NOT WITH_PYTHON2 AND NOT WITH_PYTHON3)
-    set(WITH_PYTHON2 ON)
-endif()
+find_package(Python3 COMPONENTS Interpreter)
 
-if(WITH_PYTHON2)
-    set(LATEST_AVAILABLE_VERSION 1.2.3)
-    find_package(PythonInterp 2)
-    if(PYTHONINTERP_FOUND)
-        set(PYTHON2_EXECUTABLE ${PYTHON_EXECUTABLE})
-        set(PYTHON2_VERSION_MAJOR ${PYTHON_VERSION_MAJOR})
-        set(PYTHON2_VERSION_MINOR ${PYTHON_VERSION_MINOR})
-    else()
-        message(WARNING "Cannot find python 2")
-    endif()
-endif()
-
-unset(PYTHONINTERP_FOUND)
-unset(PYTHON_EXECUTABLE)
-unset(PYTHON_VERSION_MAJOR)
-unset(PYTHON_VERSION_MINOR)
-
-if(WITH_PYTHON3)
-    # Hack, not find python3 withouut this
-    find_program(PYTHON3_EXECUTABLE python3)
-    set(PYTHON_EXECUTABLE ${PYTHON3_EXECUTABLE})
-
-    find_package(PythonInterp 3)
-    if(PYTHONINTERP_FOUND)
-        set(PYTHON3_EXECUTABLE ${PYTHON_EXECUTABLE})
-        set(PYTHON3_VERSION_MAJOR ${PYTHON_VERSION_MAJOR})
-        set(PYTHON3_VERSION_MINOR ${PYTHON_VERSION_MINOR})
-    else()
-        message(WARNING "Cannot find python 3")
-    endif()
-endif()
-
-if(NOT PYTHON2_EXECUTABLE AND NOT PYTHON3_EXECUTABLE)
+if(NOT Python3_FOUND)
     message(FATAL_ERROR "Cannot find python")
 endif()
 
-if(PYTHON2_EXECUTABLE)
-    set(PYTHON_EXECUTABLE ${PYTHON2_EXECUTABLE})
-else()
-    set(PYTHON_EXECUTABLE ${PYTHON3_EXECUTABLE})
-endif()
+set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
 
 file(DOWNLOAD "https://pypi.python.org/pypi/${PROJECT_NAME}/json" "${CMAKE_CURRENT_BINARY_DIR}/meta.json")
 
@@ -163,47 +125,32 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME})
     execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME})
 endif()
 
+include(FindAnyProject)
+find_anyproject(Openblas REQUIRED)
 
 if(WIN32)
-    set(BASE_INTEL_PATH "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries\\windows")
-    if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-        set(MKL_LIBRARY_DIRS "${BASE_INTEL_PATH}\\mkl\\lib\\intel64;${BASE_INTEL_PATH}\\compiler\\lib\\intel64")
-        set(MKL_INCLUDE_DIRS "${BASE_INTEL_PATH}\\mkl\\include")
-        set(MKL_LIBS "mkl_lapack95_lp64,mkl_blas95_lp64,mkl_intel_lp64,mkl_intel_thread,mkl_core,libiomp5md")
-        set(LAPACK_LIBS "mkl_lapack95_lp64,mkl_blas95_lp64,mkl_intel_lp64,mkl_intel_thread,mkl_core,libiomp5md")
-        set(BUILD_INCLUDES --compiler=msvc --fcompiler=intelvem)
-    else()
-        set(MKL_LIBRARY_DIRS "${BASE_INTEL_PATH}\\mkl\\lib\\ia32;${BASE_INTEL_PATH}\\compiler\\lib\\ia32")
-        set(MKL_INCLUDE_DIRS "${BASE_INTEL_PATH}\\mkl\\include")
-        set(MKL_LIBS "mkl_lapack95,mkl_blas95,mkl_intel_c,mkl_intel_thread,mkl_core,libiomp5md")
-        set(LAPACK_LIBS "mkl_lapack95,mkl_blas95,mkl_intel_c,mkl_intel_thread,mkl_core,libiomp5md")
-        set(BUILD_INCLUDES --compiler=msvc --fcompiler=intelv)
-    endif()
-
+    set(BUILD_INCLUDES --compiler=msvc --fcompiler=flang --library-dirs="C:\\Users\\root\\conda\\Library\\lib" --libraries=libflang,libpgmath)
+    
+    set(OPENBLAS_INCLUDE_DIRS ${OPENBLAS_INCLUDE_DIRS})
+    get_target_property(OPENBLAS_LIBRARY_DIRS openblas IMPORTED_IMPLIB_RELEASE)
+    get_filename_component(OPENBLAS_LIBRARY_DIRS ${OPENBLAS_LIBRARY_DIRS} DIRECTORY)
+    
     configure_file(${CMAKE_SOURCE_DIR}/cmake/site.cfg.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/site.cfg IMMEDIATE @ONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.1.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/_lib/setup.py COPYONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.2.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/fftpack/setup.py COPYONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.3.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/integrate/setup.py COPYONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.4.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/interpolate/setup.py COPYONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.5.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/io/setup.py COPYONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.6.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/optimize/setup.py COPYONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.7.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/special/setup.py COPYONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.py.8.in ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}/scipy/stats/setup.py COPYONLY)
 endif()
 
 # python setup.py install --prefix=/usr/local
 
-macro(build_py ver)
-    status_message("Configuring ... ${FLAGS} ${PYTHON${ver}_EXECUTABLE} setup.py build")
+macro(build_py)
+    status_message("Configuring ... ${FLAGS} ${PYTHON_EXECUTABLE} setup.py build")
     execute_process(COMMAND ${CMAKE_COMMAND} -E env "${FLAGS}"
-        ${PYTHON${ver}_EXECUTABLE} setup.py build ${BUILD_INCLUDES}
+        ${PYTHON_EXECUTABLE} setup.py build_ext ${BUILD_INCLUDES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}
         #OUTPUT_QUIET ERROR_QUIET
     )
 
-    add_custom_target(build_py${ver} ALL
+    add_custom_target(build_py ALL
         COMMAND ${CMAKE_COMMAND} -E env "${FLAGS}"
-        ${PYTHON${ver}_EXECUTABLE} setup.py build ${BUILD_INCLUDES}
+        ${PYTHON_EXECUTABLE} setup.py build_ext ${BUILD_INCLUDES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}
         VERBATIM
     )
@@ -214,7 +161,7 @@ macro(build_py ver)
         string(REPLACE "/" "\\\\" TMP_PATH "${CMAKE_CURRENT_BINARY_DIR}/inst_tmp")
         set(SETUP_OPTS ${SETUP_OPTS} --no-compile --single-version-externally-managed --record=rekord.txt --prefix=${TMP_PATH})
     else()
-        execute_process ( COMMAND ${PYTHON${ver}_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())" OUTPUT_VARIABLE PY_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())" OUTPUT_VARIABLE PY_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 
         set(TEST_CMD "try:
     import setuptools
@@ -222,7 +169,7 @@ macro(build_py ver)
 except ImportError:
     pass")
 
-        execute_process ( COMMAND ${PYTHON${ver}_EXECUTABLE} -c ${TEST_CMD} OUTPUT_VARIABLE PY_HAVE_SETUPTOOLS OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c ${TEST_CMD} OUTPUT_VARIABLE PY_HAVE_SETUPTOOLS OUTPUT_STRIP_TRAILING_WHITESPACE)
         if(PY_HAVE_SETUPTOOLS)
             set(SETUP_OPTS "${SETUP_OPTS} --no-compile --single-version-externally-managed --record=rekord.txt")
         endif()
@@ -245,22 +192,16 @@ except ImportError:
         set(SETUP_OPTS "${SETUP_OPTS} --prefix=${CMAKE_CURRENT_BINARY_DIR}/inst_tmp")
 
     endif()
-    add_custom_target(install_py${ver} ALL
+    add_custom_target(install_py ALL
         COMMAND ${CMAKE_COMMAND} -E env "${FLAGS}"
-        ${PYTHON${ver}_EXECUTABLE} setup.py install ${SETUP_OPTS}
-        DEPENDS build_py${ver}
+        ${PYTHON_EXECUTABLE} setup.py install ${SETUP_OPTS}
+        DEPENDS build_py
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUT_DIR_NAME}
         VERBATIM
     )
 endmacro()
 
-if(PYTHON2_EXECUTABLE)
-    build_py(2)
-endif()
-
-if(PYTHON3_EXECUTABLE)
-    build_py(3)
-endif()
+build_py()
 
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/inst_tmp/ DESTINATION ${INSTALL_LIB_DIR})

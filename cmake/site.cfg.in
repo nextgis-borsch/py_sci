@@ -1,5 +1,4 @@
-[mkl]
-library_dirs = @MKL_LIBRARY_DIRS@
-include_dirs = @MKL_INCLUDE_DIRS@
-mkl_libs = @MKL_LIBS@
-lapack_libs = @LAPACK_LIBS@
+[openblas]
+libraries = openblas
+library_dirs = @OPENBLAS_LIBRARY_DIRS@
+include_dirs = @OPENBLAS_INCLUDE_DIRS@
