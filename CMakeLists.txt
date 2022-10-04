@@ -129,7 +129,7 @@ include(FindAnyProject)
 find_anyproject(Openblas REQUIRED)
 
 if(WIN32)
-    set(BUILD_INCLUDES --compiler=msvc --fcompiler=flang --library-dirs="C:\\Users\\root\\conda\\Library\\lib" --libraries=libflang,libpgmath)
+    set(BUILD_INCLUDES --compiler=msvc --fcompiler=flang --library-dirs="$ENV{FLANG_HOME}/lib" --libraries=libflang,libpgmath)
     
     set(OPENBLAS_INCLUDE_DIRS ${OPENBLAS_INCLUDE_DIRS})
     get_target_property(OPENBLAS_LIBRARY_DIRS openblas IMPORTED_IMPLIB_RELEASE)
